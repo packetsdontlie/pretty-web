@@ -23,6 +23,7 @@ throw() {
 }
 
 flight_check() {
+	PREFIX="pw" # pretty web
 	which basename > /dev/null || throw "basename not found"
 	which dirname > /dev/null || throw "dirname not found"
 	which curl > /dev/null || throw "cURL not found"
@@ -31,7 +32,6 @@ flight_check() {
 	[ -z "${SAVE}" ] && read
 	[ -z "${SAVE}" ] || set_file
 	[ -z "${SAVE}" ] || save
-	PREFIX="pw" # pretty web
 }
 
 read() {
@@ -47,7 +47,7 @@ set_file() {
 
 save() {
 	curl --silent "${URL}" | 
-	textutil -convert txt -stdin -stdout > ${OUT}
+	textutil -convert txt -stdin -output ${OUT}
 }
 
 
