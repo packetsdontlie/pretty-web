@@ -1,0 +1,68 @@
+#!/bin/bash
+# dependencies:
+# curl, textutil, basename, dirname
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+IFS='
+'
+show_usage() {
+	echo "$0"
+	echo "-------------------------------------------------------------------"
+	echo "Take content from the URL and make it pretty"
+	echo ""
+	echo "      -u for URL (required)"
+	echo "      -s for saving to file (optional)"
+	echo ""
+	echo "   $0 -u http://example.com -> will dump the site"
+	echo "   $0 -u http://example.com -s /path/to/file -> save as txt"
+	echo ""
+}
+
+throw() {
+	echo "${*}"
+	exit 1
+}
+
+flight_check() {
+	which basename > /dev/null || throw "basename not found"
+	which dirname > /dev/null || throw "dirname not found"
+	which curl > /dev/null || throw "cURL not found"
+	which textutil > /dev/null || throw "textutil not found, may not be a Mac"
+	[ -z "${URL}" ] && throw "URL not supplied"
+	[ -z "${SAVE}" ] && read
+	[ -z "${SAVE}" ] || set_file
+	[ -z "${SAVE}" ] || save
+	PREFIX="pw" # pretty web
+}
+
+read() {
+	curl --silent "${URL}" | 
+	textutil -convert txt -stdin -stdout 
+}
+
+set_file() {
+	LHS=$(dirname ${SAVE})
+	RHS=$(basename ${SAVE})
+	OUT="${LHS}/${PREFIX}.${RHS}.txt"
+}
+
+save() {
+	curl --silent "${URL}" | 
+	textutil -convert txt -stdin -stdout > ${OUT}
+}
+
+
+script_exec() {
+	flight_check
+}
+
+while getopts ":u:s:" options
+do
+   case $options in
+	u ) URL="${OPTARG}";;
+	s ) SAVE="${OPTARG}";;
+	* ) show_usage
+		exit 0;;
+   esac
+done
+
+script_exec
